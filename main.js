@@ -251,7 +251,7 @@ const jarroMap  = textureLoader.load('texturas/texturas/internal_ground_ao_textu
 
 
 //candelabro
-loaderFbx.load("modelos/barbie candelabro.fbxbarbie candelabro.fbx", function(object){
+loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
     object.scale.x=0.04
     object.scale.y=0.03
     object.scale.z=0.04
@@ -547,4 +547,5 @@ function animate() {
 
 }
 camera.position.z = 25
+
 camera.lookAt(-20, 0, -7); 
