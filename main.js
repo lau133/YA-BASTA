@@ -36,7 +36,7 @@ renderer.xr.enabled = true;
 document.body.appendChild( VRButton.createButton( renderer ) );
 
 const controls = new OrbitControls( camera, renderer.domElement );
-				controls.target.set( 0, 0, 0 );
+				controls.target.set( 10, 0, 0 );
 				controls.update();
 
 
@@ -84,7 +84,69 @@ const light7 = new THREE.PointLight( 0xF2B1F1, 1, 15 );
 light7.position.set( 0, 5.5, 18 );
 scene.add( light7 );
 
-camera.position.z = 10;
+const light8 = new THREE.PointLight( 0xffffff,  1, 20 );
+light8.position.set( 15, 4, -38 );
+scene.add( light8 );
+
+const light9 = new THREE.PointLight( 0xF2B1F1, 1, 15 );
+light9.position.set( 25, 5.5, -0 );
+scene.add( light9 );
+
+const light10 = new THREE.PointLight( 0xF2B1F1, 1, 15 );
+light10.position.set( 25, 5.5, 10 );
+scene.add( light10 );
+
+
+function addLight(color, intensity, distance, x, y, z) {
+    const light = new THREE.PointLight(color, intensity, distance);
+    light.position.set(x, y, z);
+    scene.add(light);
+}
+
+// Todas las posiciones que tenías
+const lightPositions = [
+    [5, 4, -36],
+    [5, 4, -28],
+    [5, 4, -24],
+    [5, 2, -24],
+    [5, 0, -24],
+    [5, 4, -20],
+    [5, 2, -20],
+    [5, 0, -30],
+    [5, 4, -30],
+    [5, 4, -38],
+    [5, 0, -38],
+    [5,-2, -38],
+    [5, 4, -42],
+    [5, 4, -47],
+    [5, 2, -47],
+    [5, 0, -45],
+
+    [25, 4, -36],
+    [25, 4, -28],
+    [25, 4, -24],
+    [25, 2, -24],
+    [25, 0, -24],
+    [25, 4, -20],
+    [25, 2, -20],
+    [25, 0, -30],
+    [25, 4, -30],
+    [25, 4, -38],
+    [25, 0, -38],
+    [25,-2, -38],
+    [25, 4, -42],
+    [25, 4, -47],
+    [25, 2, -47],
+    [25, 0, -45],
+
+];
+
+// Crear todas las luces
+lightPositions.forEach(pos => {
+    addLight(0xF2B1F1, 1, 4, pos[0], pos[1], pos[2]);
+});
+
+
 
 
     //manager fbx
@@ -205,7 +267,88 @@ cylinder.position.x = 20
 cylinder.position.z = 10
 cylinder.position.y = -5.9
 
+//Pared del fondo rosa
+const geometry16 = new THREE.BoxGeometry( 10, 10, 0.1 ); 
+const material16 = new THREE.MeshPhongMaterial({color: 0xFFD6E8}); 
+const cube12 = new THREE.Mesh( geometry16, material16 ); 
+scene.add( cube12 );
+cube12.position.z= -13.7
+cube12.position.x= 1.5
 
+//pared blanca fondo2
+const geometry17 = new THREE.BoxGeometry( 13, 13, 0.1 ); 
+const material17 = new THREE.MeshPhongMaterial({color: 0xffffff}); 
+const cube13 = new THREE.Mesh( geometry17, material17 ); 
+scene.add( cube13 );
+cube13.position.z= -13.8
+cube13.position.x= 1.5
+
+//Pared del fondo rosa
+const geometry18 = new THREE.BoxGeometry( 10, 10, 0.1 ); 
+const material18 = new THREE.MeshPhongMaterial({color: 0xFFD6E8}); 
+const cube14 = new THREE.Mesh( geometry18, material18 ); 
+scene.add( cube14 );
+cube14.position.z= -13.7
+cube14.position.x= 29.5
+
+//pared blanca fondo2
+const geometry19 = new THREE.BoxGeometry( 13, 13, 0.1 ); 
+const material19 = new THREE.MeshPhongMaterial({color: 0xffffff}); 
+const cube15 = new THREE.Mesh( geometry19, material19 ); 
+scene.add( cube15 );
+cube15.position.z= -13.8
+cube15.position.x= 30
+
+//Pared de la iz2
+const geometry20 = new THREE.BoxGeometry( 0.1, 13, 40 ); 
+const material20 = new THREE.MeshPhongMaterial(); 
+const cube16 = new THREE.Mesh( geometry20, material2 ); 
+scene.add( cube16 );
+cube16.position.z= -33
+cube16.position.x= 35
+
+//Pared de la iz2
+const geometry21 = new THREE.BoxGeometry( 0.1, 13, 40 ); 
+const material21 = new THREE.MeshPhongMaterial(); 
+const cube17 = new THREE.Mesh( geometry21, material2 ); 
+scene.add( cube17 );
+cube17.position.z= -33
+cube17.position.x= -4.7
+
+//techo2
+const geometry22 = new THREE.BoxGeometry( 40, 0.1, 40 ); 
+const material22 = new THREE.MeshPhongMaterial( {color: 0xffffff} ); 
+const cube18 = new THREE.Mesh( geometry4, material4 ); 
+scene.add( cube18 );
+cube18.position.y= 6
+cube18.position.x= 15
+cube18.position.z= -33
+
+//pared blanca fondo3
+const geometry23 = new THREE.BoxGeometry( 40, 13, 0.1 ); 
+const material23 = new THREE.MeshPhongMaterial(); 
+const cube19 = new THREE.Mesh( geometry23, material23 ); 
+scene.add( cube19 );
+cube19.position.z= -53
+cube19.position.x= 15
+
+//Piso
+const geometry24 = new THREE.BoxGeometry( 40, 0.1, 40 ); 
+const material24 = new THREE.MeshPhongMaterial( {color: 0xffffff} ); 
+const cube20 = new THREE.Mesh( geometry24, material3 ); 
+scene.add( cube20 );
+cube20.position.y= -6
+cube20.position.x= 15
+cube20.position.z= -34
+
+//Pisoalfombra rosao
+const geometry25 = new THREE.BoxGeometry( 10, 0.1, 40 ); 
+const material25 = new THREE.MeshPhongMaterial( {} ); 
+const cube21 = new THREE.Mesh( geometry25, material25 ); 
+scene.add( cube21 );
+cube21.position.y= -5.5
+cube21.position.x= 15
+cube21.position.z= -34
 
 //Texturas
 
@@ -243,12 +386,33 @@ loader4.load('texturas/fondo-texturizado-textil-en-relieve-rosa-pastel.jpg', (te
 
 //planta
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('texturas/texturas/Leaf0.jpeg');
-const normalMap  = textureLoader.load('texturas/texturas/Soil.jpeg');
-const jarroMap  = textureLoader.load('texturas/texturas/internal_ground_ao_texture.jpeg');
+const texture = textureLoader.load('texturas/Leaf0.jpeg');
+const normalMap  = textureLoader.load('texturas/Soil.jpeg');
+const jarroMap  = textureLoader.load('texturas/internal_ground_ao_texture.jpeg');
+
+//Alfomra2
+//piso
+const loader5 = new THREE.TextureLoader(manager2)
+loader5.load('texturas/Recurso 1.png', (texture)=>{
+    material25.map = texture 
+});
+
+
+//piso
+const loader6 = new THREE.TextureLoader(manager2)
+loader6.load('texturas/Imagen de WhatsApp 2025-11-15 a las 14.54.19_b6d0c3e0.jpg', (texture)=>{
+    material23.map = texture 
+});
+
+
+//kirby
+const textureLoader2 = new THREE.TextureLoader();
+const texture2 = textureLoader.load('texturas/bratz_cybertruck.png');
 
 
 
+
+//MODELOS
 
 //candelabro
 loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
@@ -393,14 +557,15 @@ object.rotation.y = Math.PI*1.5;
 })
 
 //libros
-loaderFbx.load("modelos/barbie libros.fbx", function(object){
-    object.scale.x=0.05
-    object.scale.y=0.05
-    object.scale.z=0.05
-    object.position.x= 31
-    object.position.y= -5.7
-    object.position.z= -17
-object.rotation.y = Math.PI*1.5;
+loaderFbx.load("modelos/barbie closet.fbx", function(object){
+    object.scale.x=4.5
+    object.scale.y=4.5
+    object.scale.z=4.5
+    object.position.x= 55
+    object.position.y= -20
+    object.position.z= 90
+    object.rotation.y = Math.PI;
+
     
     
     scene.add(object)
@@ -421,14 +586,14 @@ loaderFbx.load("modelos/lampara grande barbie.fbx", function(object){
 })
 
 //tv 
-loaderFbx.load("modelos/TV.fbx", function(object){
-    object.scale.x=0.07
-    object.scale.y=0.07
-    object.scale.z=0.07
-    object.position.x= 34
-    object.position.y= 5
-    object.position.z= 26
-object.rotation.y = Math.PI/2;
+loaderFbx.load("modelos/barbie tv.fbx", function(object){
+    object.scale.x=6.5
+    object.scale.y=6.5
+    object.scale.z=6.5
+    object.position.x= 135
+    object.position.y= -6
+    object.position.z= 78
+object.rotation.y = -Math.PI/2;
     
     
     scene.add(object)
@@ -540,12 +705,158 @@ object.rotation.y = Math.PI;
     scene.add(object)
 })
 
+//Cortinas
+
+loaderFbx.load("modelos/barbue cortinas.fbx", function(object){
+    object.scale.x=0.04
+    object.scale.y=0.04
+    object.scale.z=0.04
+    object.position.x= 18
+    object.position.y= -4.5
+    object.position.z= -14
+object.rotation.y = Math.PI;
+    
+    
+    scene.add(object)
+})
+
+
+//armario1
+
+loaderFbx.load("modelos/aarmario Barbie.fbx", function(object){
+    object.scale.x=4
+    object.scale.y=4
+    object.scale.z=4
+    object.position.x= 55
+    object.position.y= -100
+    object.position.z= -44
+
+    
+    scene.add(object)
+})
+
+
+loaderFbx.load("modelos/aarmario Barbie.fbx", function(object){
+    object.scale.x=4
+    object.scale.y=4
+    object.scale.z=4
+    object.position.x= -25
+    object.position.y= -100
+    object.position.z= -23
+object.rotation.y = Math.PI;
+    
+    scene.add(object)
+})
+
+//candelabro
+loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
+    object.scale.x=0.04
+    object.scale.y=0.02
+    object.scale.z=0.04
+    object.position.x= 15
+    object.position.y= 6
+    object.position.z= -40
+
+    
+    
+    scene.add(object)
+})
+
+//kirby
+loaderFbx.load("modelos/kirbylol.fbx", function(object){
+    object.scale.x=8
+    object.scale.y=8
+    object.scale.z=8
+    object.position.x= 39
+    object.position.y= -6
+    object.position.z= -7.5
+
+    
+    
+    scene.add(object)
+})
+
+
+//kirby
+loaderFbx.load("modelos/cyberbratz.fbx", function(object){
+    object.scale.x=0.01
+    object.scale.y=0.01
+    object.scale.z=0.01
+    object.position.x= 26
+    object.position.y= 0.3
+    object.position.z= -31.3
+
+    object.traverse((child) => {
+    if (child.isMesh) {
+      child.material = new THREE.MeshPhongMaterial({
+        
+
+        map: texture2,
+        
+        
+
+      });
+      child.material.needsUpdate = true;
+    }
+  });
+    
+
+    
+    
+    scene.add(object)
+})
+
+//kirby
+loaderFbx.load("modelos/Amethyst Barbie Sword.fbx", function(object){
+    object.scale.x=0.0008
+    object.scale.y=0.0008
+    object.scale.z=0.0008
+    object.position.x= 5
+    object.position.y= -2
+    object.position.z= -16
+object.rotation.x = -Math.PI/3;
+    
+    
+    scene.add(object)
+})
+
+//kirby
+loaderFbx.load("modelos/piupiu.fbx", function(object){
+    object.scale.x=0.2
+    object.scale.y=0.2
+    object.scale.z=0.2
+    object.position.x= 16
+    object.position.y= -3.5
+    object.position.z= 0
+object.rotation.y = -Math.PI;
+object.rotation.z = Math.PI/2;
+    
+    
+    scene.add(object)
+})
+
+
+//kirby
+loaderFbx.load("modelos/amongus.fbx", function(object){
+    object.scale.x=0.8
+    object.scale.y=0.8
+    object.scale.z=0.8
+    object.position.x= -2
+    object.position.y= -6
+    object.position.z= -8
+
+    
+    scene.add(object)
+})
+
+
+
 function animate() {
 
     if (!texturesReady) return;
     renderer.render( scene, camera );
 
 }
-camera.position.z = 25
-
+camera.position.z = 15
+camera.position.x = 18
 camera.lookAt(-20, 0, -7); 
