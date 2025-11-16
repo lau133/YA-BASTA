@@ -96,6 +96,10 @@ const light10 = new THREE.PointLight( 0xF2B1F1, 1, 15 );
 light10.position.set( 25, 5.5, 10 );
 scene.add( light10 );
 
+const light11 = new THREE.PointLight( 0xF2B1F1,  1, 20 );
+light11.position.set( 15, 4, -25 );
+scene.add( light11 );
+
 
 function addLight(color, intensity, distance, x, y, z) {
     const light = new THREE.PointLight(color, intensity, distance);
@@ -269,7 +273,7 @@ cylinder.position.y = -5.9
 
 //Pared del fondo rosa
 const geometry16 = new THREE.BoxGeometry( 10, 10, 0.1 ); 
-const material16 = new THREE.MeshPhongMaterial({color: 0xFFD6E8}); 
+const material16 = new THREE.MeshPhongMaterial({color: 0xffffff}); 
 const cube12 = new THREE.Mesh( geometry16, material16 ); 
 scene.add( cube12 );
 cube12.position.z= -13.7
@@ -277,7 +281,7 @@ cube12.position.x= 1.5
 
 //pared blanca fondo2
 const geometry17 = new THREE.BoxGeometry( 13, 13, 0.1 ); 
-const material17 = new THREE.MeshPhongMaterial({color: 0xffffff}); 
+const material17 = new THREE.MeshPhongMaterial({color: 0xD11FAB}); 
 const cube13 = new THREE.Mesh( geometry17, material17 ); 
 scene.add( cube13 );
 cube13.position.z= -13.8
@@ -285,7 +289,7 @@ cube13.position.x= 1.5
 
 //Pared del fondo rosa
 const geometry18 = new THREE.BoxGeometry( 10, 10, 0.1 ); 
-const material18 = new THREE.MeshPhongMaterial({color: 0xFFD6E8}); 
+const material18 = new THREE.MeshPhongMaterial({color: 0xffffff}); 
 const cube14 = new THREE.Mesh( geometry18, material18 ); 
 scene.add( cube14 );
 cube14.position.z= -13.7
@@ -293,7 +297,7 @@ cube14.position.x= 29.5
 
 //pared blanca fondo2
 const geometry19 = new THREE.BoxGeometry( 13, 13, 0.1 ); 
-const material19 = new THREE.MeshPhongMaterial({color: 0xffffff}); 
+const material19 = new THREE.MeshPhongMaterial({color: 0xD11FAB}); 
 const cube15 = new THREE.Mesh( geometry19, material19 ); 
 scene.add( cube15 );
 cube15.position.z= -13.8
@@ -849,6 +853,20 @@ loaderFbx.load("modelos/amongus.fbx", function(object){
     scene.add(object)
 })
 
+
+//candelabro
+loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
+    object.scale.x=0.04
+    object.scale.y=0.02
+    object.scale.z=0.04
+    object.position.x= 15
+    object.position.y= 6
+    object.position.z= -25
+
+    
+    
+    scene.add(object)
+})
 
 
 function animate() {
