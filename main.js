@@ -3,6 +3,18 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js'
 
+let gamepad = null;
+
+window.addEventListener("gamepadconnected", (event) => {
+    console.log("GAMEPAD CONECTADO:", event.gamepad);
+    gamepad = event.gamepad;
+});
+
+window.addEventListener("gamepaddisconnected", (event) => {
+    console.log("GAMEPAD DESCONECTADO");
+    gamepad = null;
+});
+
 let texturesReady = false;
 
 const manager2 = new THREE.LoadingManager(() => {
@@ -374,10 +386,7 @@ loader4.load('texturas/fondo-texturizado-textil-en-relieve-rosa-pastel.jpg', (te
     material9.map = texture
 })
 
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('texturas/Leaf0.jpeg');
-const normalMap  = textureLoader.load('texturas/Soil.jpeg');
-const jarroMap  = textureLoader.load('texturas/internal_ground_ao_texture.jpeg');
+
 
 const loader5 = new THREE.TextureLoader(manager2)
 loader5.load('texturas/Recurso 1.png', (texture)=>{
@@ -646,7 +655,22 @@ loaderFbx.load("modelos/barbie puff.fbx", function(object){
     scene.add(object)
 })
 
-
+//espejo
+loaderFbx.load("modelos/barbie espejo.fbx", function(object){
+    object.scale.x=0.3
+    object.scale.y=0.3
+    object.scale.z=0.3
+    object.position.x= 23
+    object.position.y= 1
+    object.position.z= 25
+    object.rotation.y = Math.PI;
+    object.traverse(function(child){
+        if (child.isMesh){
+            child.material=material14;
+        }
+    })
+    scene.add(object)
+})
 
 //Cortinas
 loaderFbx.load("modelos/barbue cortinas.fbx", function(object){
@@ -837,6 +861,28 @@ window.addEventListener('mousemove', (event) => {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 });
 
+
+function vrRaycast() {
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyQuaternion(camera.quaternion); // dirección en VR
+
+    raycaster.set(camera.position, direction);
+    
+    const intersects = raycaster.intersectObjects(selectableObjects, true);
+    return intersects;
+}
+
+
+function gamepadShootPressed() {
+    if (!gamepad) return false;
+
+    const gp = navigator.getGamepads()[gamepad.index];
+    if (!gp) return false;
+
+    return gp.buttons[7]?.pressed || false; 
+}
+
+
 window.addEventListener('click', (event) => {
     if (renderer.xr.isPresenting) return;
     
@@ -860,38 +906,54 @@ window.addEventListener('click', (event) => {
 
 function animate() {
     if (!texturesReady) return;
-    
-    // Raycast para hover en modo desktop
+
+    // --- Desktop ---
     if (!renderer.xr.isPresenting) {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(selectableObjects, true);
         
-        // Quitar highlight del objeto anterior
         if (hoveredObject && !foundObjects.has(hoveredObject)) {
             unhighlightObject(hoveredObject);
         }
-        
-        // Aplicar highlight al nuevo objeto
+
         if (intersects.length > 0) {
             const object = intersects[0].object;
-            if (object.userData.selectable && object.userData.isTarget && !foundObjects.has(object.userData.objectName)) {
+            if (object.userData.selectable && object.userData.isTarget) {
                 hoveredObject = object;
                 highlightObject(object);
-                document.body.style.cursor = 'pointer';
-            } else {
-                hoveredObject = null;
-                document.body.style.cursor = 'default';
+                document.body.style.cursor = "pointer";
             }
         } else {
             hoveredObject = null;
-            document.body.style.cursor = 'default';
+            document.body.style.cursor = "default";
         }
     }
-    
+
+    // --- VR + Gamepad ---
+    else {
+        const intersects = vrRaycast();
+
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+
+            // Disparo con cualquier gamepad (botón 7 = gatillo)
+            if (gamepadShootPressed()) {
+                if (object.userData.selectable && object.userData.isTarget) {
+                    if (!foundObjects.has(object.userData.objectName)) {
+                        foundObjects.add(object.userData.objectName);
+                        highlightObject(object, true);
+                        updateUI();
+                        console.log("¡Objeto encontrado!", object.userData.objectName);
+                    }
+                }
+            }
+        }
+    }
+
     renderer.render(scene, camera);
 }
+
 
 camera.position.z = 15
 camera.position.x = 18
 camera.lookAt(-20, 0, -7);
-
