@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js'
 
-
 let texturesReady = false;
 
 const manager2 = new THREE.LoadingManager(() => {
@@ -11,19 +10,15 @@ const manager2 = new THREE.LoadingManager(() => {
     texturesReady = true;
 });
 
-
-// Función para cargar texturas con manager
 function loadTex(path) {
     const tex = new THREE.TextureLoader(manager2).load(path);
     tex.encoding = THREE.sRGBEncoding;
     tex.needsUpdate = true;
     return tex;
 }
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-
-
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -32,40 +27,82 @@ document.body.appendChild( renderer.domElement );
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.xr.enabled = true;
-			renderer.xr.setReferenceSpaceType( 'local' );
+renderer.xr.setReferenceSpaceType( 'local' );
 document.body.appendChild( VRButton.createButton( renderer ) );
 
 const controls = new OrbitControls( camera, renderer.domElement );
-				controls.target.set( 10, 0, 0 );
-				controls.update();
+controls.target.set( 10, 0, 0 );
+controls.update();
 
+// Sistema de raycast para selección
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
+// Array para objetos seleccionables y encontrados
+const selectableObjects = [];
+const foundObjects = new Set();
+let targetObjects = []; // Objetos que NO pertenecen al entorno
 
-                const loader = new THREE.CubeTextureLoader(manager2);
+// UI para mostrar progreso
+const uiDiv = document.createElement('div');
+uiDiv.style.position = 'absolute';
+uiDiv.style.top = '10px';
+uiDiv.style.left = '10px';
+uiDiv.style.color = 'white';
+uiDiv.style.fontFamily = 'Arial, sans-serif';
+uiDiv.style.fontSize = '24px';
+uiDiv.style.fontWeight = 'bold';
+uiDiv.style.backgroundColor = 'rgba(0,0,0,0.7)';
+uiDiv.style.padding = '15px 25px';
+uiDiv.style.borderRadius = '10px';
+uiDiv.style.border = '2px solid #FF1493';
+uiDiv.innerHTML = 'Objetos encontrados: 0/5';
+document.body.appendChild(uiDiv);
+
+// UI para pantalla de victoria
+const winDiv = document.createElement('div');
+winDiv.style.position = 'fixed';
+winDiv.style.top = '50%';
+winDiv.style.left = '50%';
+winDiv.style.transform = 'translate(-50%, -50%)';
+winDiv.style.color = '#FFD700';
+winDiv.style.fontFamily = 'Arial, sans-serif';
+winDiv.style.fontSize = '80px';
+winDiv.style.fontWeight = 'bold';
+winDiv.style.textAlign = 'center';
+winDiv.style.backgroundColor = 'rgba(209, 31, 171, 0.95)';
+winDiv.style.padding = '50px 80px';
+winDiv.style.borderRadius = '30px';
+winDiv.style.border = '5px solid #FFD700';
+winDiv.style.boxShadow = '0 0 50px rgba(255, 215, 0, 0.8)';
+winDiv.style.display = 'none';
+winDiv.style.zIndex = '1000';
+winDiv.innerHTML = '¡GANASTE! 🎉<br><span style="font-size: 40px;">¡Encontraste todos los objetos!</span>';
+document.body.appendChild(winDiv);
+
+const loader = new THREE.CubeTextureLoader(manager2);
 loader.setPath( 'img/' );
 
 const textureCube = loader.load( [
-	'px.png', 'nx.png',
-	'py.png', 'ny.png',
-	'pz.png', 'nz.png'
+    'px.png', 'nx.png',
+    'py.png', 'ny.png',
+    'pz.png', 'nz.png'
 ] );
 
 const material14 = new THREE.MeshBasicMaterial( { color: 0xffffff, envMap: textureCube } );
-
 scene.background=textureCube
 
 const light = new THREE.PointLight( 0xffffff, 1, 20 );
 light.position.set( 6, 4, 7 );
 scene.add( light );
-light.castShadow = true; // default false
+light.castShadow = true;
 scene.add( light );
 
 const light3 = new THREE.PointLight( 0xffffff, 1, 20 );
 light3.position.set( 28, -0, 23 );
 scene.add( light3 );
 
-
-const light2 = new THREE.AmbientLight( 0xffffff, 0.6 ); // soft white light
+const light2 = new THREE.AmbientLight( 0xffffff, 0.6 );
 scene.add( light2 );
 
 const light4 = new THREE.PointLight( 0xffffff, 0.7, 20 );
@@ -100,63 +137,27 @@ const light11 = new THREE.PointLight( 0xF2B1F1,  1, 20 );
 light11.position.set( 15, 4, -25 );
 scene.add( light11 );
 
-
 function addLight(color, intensity, distance, x, y, z) {
     const light = new THREE.PointLight(color, intensity, distance);
     light.position.set(x, y, z);
     scene.add(light);
 }
 
-// Todas las posiciones que tenías
 const lightPositions = [
-    [5, 4, -36],
-    [5, 4, -28],
-    [5, 4, -24],
-    [5, 2, -24],
-    [5, 0, -24],
-    [5, 4, -20],
-    [5, 2, -20],
-    [5, 0, -30],
-    [5, 4, -30],
-    [5, 4, -38],
-    [5, 0, -38],
-    [5,-2, -38],
-    [5, 4, -42],
-    [5, 4, -47],
-    [5, 2, -47],
-    [5, 0, -45],
-
-    [25, 4, -36],
-    [25, 4, -28],
-    [25, 4, -24],
-    [25, 2, -24],
-    [25, 0, -24],
-    [25, 4, -20],
-    [25, 2, -20],
-    [25, 0, -30],
-    [25, 4, -30],
-    [25, 4, -38],
-    [25, 0, -38],
-    [25,-2, -38],
-    [25, 4, -42],
-    [25, 4, -47],
-    [25, 2, -47],
-    [25, 0, -45],
-
+    [5, 4, -36], [5, 4, -28], [5, 4, -24], [5, 2, -24], [5, 0, -24],
+    [5, 4, -20], [5, 2, -20], [5, 0, -30], [5, 4, -30], [5, 4, -38],
+    [5, 0, -38], [5,-2, -38], [5, 4, -42], [5, 4, -47], [5, 2, -47], [5, 0, -45],
+    [25, 4, -36], [25, 4, -28], [25, 4, -24], [25, 2, -24], [25, 0, -24],
+    [25, 4, -20], [25, 2, -20], [25, 0, -30], [25, 4, -30], [25, 4, -38],
+    [25, 0, -38], [25,-2, -38], [25, 4, -42], [25, 4, -47], [25, 2, -47], [25, 0, -45],
 ];
 
-// Crear todas las luces
 lightPositions.forEach(pos => {
     addLight(0xF2B1F1, 1, 4, pos[0], pos[1], pos[2]);
 });
 
-
-
-
-    //manager fbx
-    const manager = new THREE.LoadingManager();
+const manager = new THREE.LoadingManager();
 const loaderFbx = new FBXLoader( manager );
-  
 
 //Pared de la iz
 const geometry2 = new THREE.BoxGeometry( 0.1, 13, 40 ); 
@@ -265,8 +266,6 @@ const geometry15 = new THREE.CylinderGeometry( 7, 7, 0.2, 32 );
 const material15 = new THREE.MeshPhongMaterial( { envMap:textureCube, reflectivity:0.2, shininess:0.5} ); 
 const cylinder5 = new THREE.Mesh( geometry5, material15 );
 
-
-
 cylinder.position.x = 20
 cylinder.position.z = 10
 cylinder.position.y = -5.9
@@ -355,66 +354,92 @@ cube21.position.x= 15
 cube21.position.z= -34
 
 //Texturas
-
-//pared 
 const loader1 = new THREE.TextureLoader()
 loader1.load('texturas/3182477.jpg', (texture)=>{
     material5.map = texture
-    
-    
 })
 
-//cajones
 const loader2 = new THREE.TextureLoader()
 loader2.load('texturas/Captura de pantalla 2025-09-05 151602.png', (texture)=>{
     material6.map = texture
-    
-    
 })
 
-//piso
 const loader3 = new THREE.TextureLoader()
 loader3.load('texturas/X101401_220x150cm.webp', (texture)=>{
     material3.map = texture 
-    
-    
 })
 
-//alfombra
 const loader4 = new THREE.TextureLoader()
 loader4.load('texturas/fondo-texturizado-textil-en-relieve-rosa-pastel.jpg', (texture)=>{
     material9.map = texture
-    
-    
 })
 
-//planta
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load('texturas/Leaf0.jpeg');
 const normalMap  = textureLoader.load('texturas/Soil.jpeg');
 const jarroMap  = textureLoader.load('texturas/internal_ground_ao_texture.jpeg');
 
-//Alfomra2
-//piso
 const loader5 = new THREE.TextureLoader(manager2)
 loader5.load('texturas/Recurso 1.png', (texture)=>{
     material25.map = texture 
 });
 
-
-//piso
 const loader6 = new THREE.TextureLoader(manager2)
 loader6.load('texturas/Imagen de WhatsApp 2025-11-15 a las 14.54.19_b6d0c3e0.jpg', (texture)=>{
     material23.map = texture 
 });
 
-
-//kirby
 const textureLoader2 = new THREE.TextureLoader();
 const texture2 = textureLoader.load('texturas/bratz_cybertruck.png');
 
+// Función para marcar un objeto como seleccionable
+function makeSelectable(object, isTarget = false, objectName = '') {
+    object.userData.selectable = true;
+    object.userData.isTarget = isTarget;
+    object.userData.objectName = objectName;
+    
+    // Guardar propiedades originales del material en lugar de clonarlo
+    if (object.material) {
+        object.userData.originalEmissive = object.material.emissive ? object.material.emissive.clone() : new THREE.Color(0x000000);
+        object.userData.originalEmissiveIntensity = object.material.emissiveIntensity || 0;
+    }
+    
+    selectableObjects.push(object);
+    
+    if (isTarget) {
+        targetObjects.push(object);
+        updateUI();
+    }
+}
 
+// Función para resaltar objeto
+function highlightObject(object, isFound = false) {
+    if (object.material) {
+        if (isFound) {
+            object.material.emissive = new THREE.Color(0x00ff00);
+            object.material.emissiveIntensity = 0.5;
+        } else {
+            object.material.emissive = new THREE.Color(0xffff00);
+            object.material.emissiveIntensity = 0.3;
+        }
+    }
+}
 
+// Función para quitar resaltado
+function unhighlightObject(object) {
+    if (object.material && object.userData.originalMaterial) {
+        object.material.emissive = new THREE.Color(0x000000);
+        object.material.emissiveIntensity = 0;
+    }
+}
+
+// Actualizar UI
+function updateUI() {
+    uiDiv.innerHTML = Objetos encontrados: ${foundObjects.size}/${targetObjects.length};
+    if (foundObjects.size === targetObjects.length && targetObjects.length > 0) {
+        winDiv.style.display = 'block';
+    }
+}
 
 //MODELOS
 
@@ -426,9 +451,6 @@ loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
     object.position.x= 6
     object.position.y= 6
     object.position.z= 7
-
-    
-    
     scene.add(object)
 })
 
@@ -440,9 +462,8 @@ loaderFbx.load("modelos/barbie piano.fbx", function(object){
     object.position.x= 5.3
     object.position.y= -6
     object.position.z= 20
-object.rotation.y = Math.PI/2;
-    
-    
+    object.rotation.y = Math.PI/2;
+    object.name = "piano";
     scene.add(object)
 })
 
@@ -454,9 +475,6 @@ loaderFbx.load("modelos/barbie sofa.fbx", function(object){
     object.position.x= 5.3
     object.position.y= -6
     object.position.z= 4
-//object.rotation.y = Math.PI/2;
-    
-    
     scene.add(object)
 })
 
@@ -468,25 +486,19 @@ loaderFbx.load("modelos/Plant1.fbx", function(object){
     object.position.x= 0
     object.position.y= -6
     object.position.z= 15
-object.rotation.y = Math.PI/2;
-object.traverse((child) => {
-    if (child.isMesh) {
-      child.material = new THREE.MeshPhongMaterial({
-        jarroMap: jarroMap,
-
-        map: texture,
-        normalMap: normalMap,
-        
-
-      });
-      child.material.needsUpdate = true;
-    }
-  });
-    
-    
+    object.rotation.y = Math.PI/2;
+    object.traverse((child) => {
+        if (child.isMesh) {
+            child.material = new THREE.MeshPhongMaterial({
+                jarroMap: jarroMap,
+                map: texture,
+                normalMap: normalMap,
+            });
+            child.material.needsUpdate = true;
+        }
+    });
     scene.add(object)
 })
-
 
 //mesa
 loaderFbx.load("modelos/barbie mesa.fbx", function(object){
@@ -496,9 +508,6 @@ loaderFbx.load("modelos/barbie mesa.fbx", function(object){
     object.position.x= 10
     object.position.y= -6
     object.position.z= 6
-//object.rotation.y = Math.PI/2;
-    
-    
     scene.add(object)
 })
 
@@ -510,13 +519,9 @@ loaderFbx.load("modelos/barbie cuadro1.fbx", function(object){
     object.position.x= 13
     object.position.y= 1
     object.position.z= 23
-object.rotation.y = Math.PI;
-    
-    
+    object.rotation.y = Math.PI;
     scene.add(object)
 })
-
-
 
 //cuadro2
 loaderFbx.load("modelos/barbie cuadro2.fbx", function(object){
@@ -526,9 +531,7 @@ loaderFbx.load("modelos/barbie cuadro2.fbx", function(object){
     object.position.x= -2.5
     object.position.y= 1
     object.position.z= 6
-object.rotation.y = Math.PI/2;
-    
-    
+    object.rotation.y = Math.PI/2;
     scene.add(object)
 })
 
@@ -540,9 +543,6 @@ loaderFbx.load("modelos/lampara grande barbie.fbx", function(object){
     object.position.x= 28
     object.position.y= -5.7
     object.position.z= 23
-//object.rotation.y = Math.PI/2;
-    
-    
     scene.add(object)
 })
 
@@ -554,13 +554,11 @@ loaderFbx.load("modelos/barbie libros.fbx", function(object){
     object.position.x= 31
     object.position.y= -5.7
     object.position.z= 5
-object.rotation.y = Math.PI*1.5;
-    
-    
+    object.rotation.y = Math.PI*1.5;
     scene.add(object)
 })
 
-//libros
+//closet
 loaderFbx.load("modelos/barbie closet.fbx", function(object){
     object.scale.x=4.5
     object.scale.y=4.5
@@ -569,9 +567,6 @@ loaderFbx.load("modelos/barbie closet.fbx", function(object){
     object.position.y= -20
     object.position.z= 90
     object.rotation.y = Math.PI;
-
-    
-    
     scene.add(object)
 })
 
@@ -583,9 +578,6 @@ loaderFbx.load("modelos/lampara grande barbie.fbx", function(object){
     object.position.x= 28
     object.position.y= -5.7
     object.position.z= -10
-//object.rotation.y = Math.PI/2;
-    
-    
     scene.add(object)
 })
 
@@ -597,9 +589,7 @@ loaderFbx.load("modelos/barbie tv.fbx", function(object){
     object.position.x= 135
     object.position.y= -6
     object.position.z= 78
-object.rotation.y = -Math.PI/2;
-    
-    
+    object.rotation.y = -Math.PI/2;
     scene.add(object)
 })
 
@@ -611,9 +601,7 @@ loaderFbx.load("modelos/barbie silla.fbx", function(object){
     object.position.x= 15
     object.position.y= -6
     object.position.z= -3
-object.rotation.y = Math.PI*7/4;
-    
-    
+    object.rotation.y = Math.PI*7/4;
     scene.add(object)
 })
 
@@ -625,9 +613,6 @@ loaderFbx.load("modelos/LightFixtureRecessed.fbx", function(object){
     object.position.x= 15
     object.position.y= 5.8
     object.position.z= 11
-
-    
-    
     scene.add(object)
 })
 
@@ -639,9 +624,6 @@ loaderFbx.load("modelos/LightFixtureRecessed.fbx", function(object){
     object.position.x= 15
     object.position.y= 5.8
     object.position.z= -6
-
-    
-    
     scene.add(object)
 })
 
@@ -653,9 +635,6 @@ loaderFbx.load("modelos/LightFixtureRecessed.fbx", function(object){
     object.position.x= 0
     object.position.y= 5.8
     object.position.z= 18
-
-    
-    
     scene.add(object)
 })
 
@@ -672,12 +651,10 @@ loaderFbx.load("modelos/tvstand.fbx", function(object){
             child.material=material13;
         }
     })
-//object.rotation.y = Math.PI/2;
-    
-    
     scene.add(object)
 })
-//silla
+
+//puff
 loaderFbx.load("modelos/barbie puff.fbx", function(object){
     object.scale.x=0.25
     object.scale.y=0.25
@@ -685,9 +662,6 @@ loaderFbx.load("modelos/barbie puff.fbx", function(object){
     object.position.x= 20
     object.position.y= -6
     object.position.z= 5
-//object.rotation.y = Math.PI*7/4;
-    
-    
     scene.add(object)
 })
 
@@ -699,18 +673,16 @@ loaderFbx.load("modelos/barbie espejo.fbx", function(object){
     object.position.x= 23
     object.position.y= 1
     object.position.z= 25
-object.rotation.y = Math.PI;
+    object.rotation.y = Math.PI;
     object.traverse(function(child){
         if (child.isMesh){
             child.material=material14;
         }
     })
-    
     scene.add(object)
 })
 
 //Cortinas
-
 loaderFbx.load("modelos/barbue cortinas.fbx", function(object){
     object.scale.x=0.04
     object.scale.y=0.04
@@ -718,15 +690,11 @@ loaderFbx.load("modelos/barbue cortinas.fbx", function(object){
     object.position.x= 18
     object.position.y= -4.5
     object.position.z= -14
-object.rotation.y = Math.PI;
-    
-    
+    object.rotation.y = Math.PI;
     scene.add(object)
 })
 
-
 //armario1
-
 loaderFbx.load("modelos/aarmario Barbie.fbx", function(object){
     object.scale.x=4
     object.scale.y=4
@@ -734,11 +702,8 @@ loaderFbx.load("modelos/aarmario Barbie.fbx", function(object){
     object.position.x= 55
     object.position.y= -100
     object.position.z= -44
-
-    
     scene.add(object)
 })
-
 
 loaderFbx.load("modelos/aarmario Barbie.fbx", function(object){
     object.scale.x=4
@@ -747,8 +712,7 @@ loaderFbx.load("modelos/aarmario Barbie.fbx", function(object){
     object.position.x= -25
     object.position.y= -100
     object.position.z= -23
-object.rotation.y = Math.PI;
-    
+    object.rotation.y = Math.PI;
     scene.add(object)
 })
 
@@ -760,28 +724,37 @@ loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
     object.position.x= 15
     object.position.y= 6
     object.position.z= -40
-
-    
-    
     scene.add(object)
 })
 
-//kirby
+//kirby - OBJETO A ENCONTRAR
 loaderFbx.load("modelos/kirbylol.fbx", function(object){
-    object.scale.x=8
-    object.scale.y=8
-    object.scale.z=8
-    object.position.x= 39
-    object.position.y= -6
-    object.position.z= -7.5
-
+    object.scale.set(8, 8, 8);
+    object.position.set(39, -6, -7.5);
+    object.name = "kirby";
     
+    object.traverse((child) => {
+        if (child.isMesh) {
+            // Forzar material básico visible
+            child.material = new THREE.MeshStandardMaterial({ 
+                color: 0xffb6c1,
+                roughness: 0.5,
+                metalness: 0.1
+            });
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material.needsUpdate = true;
+            makeSelectable(child, true, 'kirby');
+        }
+    });
     
-    scene.add(object)
-})
+    scene.add(object);
+    console.log('Kirby añadido a la escena');
+}, undefined, function(error) {
+    console.error('Error cargando Kirby:', error);
+});
 
-
-//kirby
+//cyberbratz - OBJETO A ENCONTRAR (auto)
 loaderFbx.load("modelos/cyberbratz.fbx", function(object){
     object.scale.x=0.01
     object.scale.y=0.01
@@ -789,42 +762,50 @@ loaderFbx.load("modelos/cyberbratz.fbx", function(object){
     object.position.x= 26
     object.position.y= 0.3
     object.position.z= -31.3
-
+    object.name = "cybertruck";
     object.traverse((child) => {
-    if (child.isMesh) {
-      child.material = new THREE.MeshPhongMaterial({
-        
-
-        map: texture2,
-        
-        
-
-      });
-      child.material.needsUpdate = true;
-    }
-  });
-    
-
-    
-    
+        if (child.isMesh) {
+            child.material = new THREE.MeshPhongMaterial({
+                map: texture2,
+            });
+            child.material.needsUpdate = true;
+            makeSelectable(child, true, 'cybertruck');
+        }
+    });
     scene.add(object)
 })
 
-//kirby
+//Espada - OBJETO A ENCONTRAR
 loaderFbx.load("modelos/Amethyst Barbie Sword.fbx", function(object){
-    object.scale.x=0.0008
-    object.scale.y=0.0008
-    object.scale.z=0.0008
-    object.position.x= 5
-    object.position.y= -2
-    object.position.z= -16
-object.rotation.x = -Math.PI/3;
+    object.scale.set(0.0008, 0.0008, 0.0008);
+    object.position.set(5, -2, -16);
+    object.rotation.x = -Math.PI/3;
+    object.name = "espada";
     
+    object.traverse((child) => {
+        if (child.isMesh) {
+            // Forzar material básico visible
+            child.material = new THREE.MeshStandardMaterial({ 
+                color: 0x9966ff,
+                roughness: 0.3,
+                metalness: 0.7,
+                emissive: 0x330066,
+                emissiveIntensity: 0.2
+            });
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material.needsUpdate = true;
+            makeSelectable(child, true, 'espada');
+        }
+    });
     
-    scene.add(object)
-})
+    scene.add(object);
+    console.log('Espada añadida a la escena');
+}, undefined, function(error) {
+    console.error('Error cargando Espada:', error);
+});
 
-//kirby
+//pistola - OBJETO A ENCONTRAR
 loaderFbx.load("modelos/piupiu.fbx", function(object){
     object.scale.x=0.2
     object.scale.y=0.2
@@ -832,27 +813,42 @@ loaderFbx.load("modelos/piupiu.fbx", function(object){
     object.position.x= 16
     object.position.y= -3.5
     object.position.z= 0
-object.rotation.y = -Math.PI;
-object.rotation.z = Math.PI/2;
-    
-    
+    object.rotation.y = -Math.PI;
+    object.rotation.z = Math.PI/2;
+    object.name = "pistola";
+    object.traverse((child) => {
+        if (child.isMesh) {
+            makeSelectable(child, true, 'pistola');
+        }
+    });
     scene.add(object)
 })
 
-
-//kirby
+//amongus - OBJETO A ENCONTRAR
 loaderFbx.load("modelos/amongus.fbx", function(object){
-    object.scale.x=0.8
-    object.scale.y=0.8
-    object.scale.z=0.8
-    object.position.x= -2
-    object.position.y= -6
-    object.position.z= -8
-
+    object.scale.set(0.8, 0.8, 0.8);
+    object.position.set(-2, -6, -8);
+    object.name = "amongus";
     
-    scene.add(object)
-})
-
+    object.traverse((child) => {
+        if (child.isMesh) {
+            // Asegurar que tenga material visible
+            if (!child.material) {
+                child.material = new THREE.MeshStandardMaterial({ 
+                    color: 0xff0000,
+                    roughness: 0.5
+                });
+            }
+            child.material.needsUpdate = true;
+            makeSelectable(child, true, 'amongus');
+        }
+    });
+    
+    scene.add(object);
+    console.log('Among Us añadido a la escena');
+}, undefined, function(error) {
+    console.error('Error cargando Among Us:', error);
+});
 
 //candelabro
 loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
@@ -862,19 +858,73 @@ loaderFbx.load("modelos/barbie candelabro.fbx", function(object){
     object.position.x= 15
     object.position.y= 6
     object.position.z= -25
-
-    
-    
     scene.add(object)
 })
 
+// Event Listeners para mouse (modo desktop)
+let hoveredObject = null;
+
+window.addEventListener('mousemove', (event) => {
+    if (renderer.xr.isPresenting) return;
+    
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
+
+window.addEventListener('click', (event) => {
+    if (renderer.xr.isPresenting) return;
+    
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(selectableObjects, true);
+    
+    if (intersects.length > 0) {
+        const object = intersects[0].object;
+        console.log('Objeto clickeado:', object.userData);
+        
+        if (object.userData.selectable && object.userData.isTarget) {
+            if (!foundObjects.has(object.userData.objectName)) {
+                foundObjects.add(object.userData.objectName);
+                highlightObject(object, true);
+                updateUI();
+                console.log('¡Objeto encontrado!', object.userData.objectName);
+            }
+        }
+    }
+});
 
 function animate() {
-
     if (!texturesReady) return;
-    renderer.render( scene, camera );
-
+    
+    // Raycast para hover en modo desktop
+    if (!renderer.xr.isPresenting) {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(selectableObjects, true);
+        
+        // Quitar highlight del objeto anterior
+        if (hoveredObject && !foundObjects.has(hoveredObject)) {
+            unhighlightObject(hoveredObject);
+        }
+        
+        // Aplicar highlight al nuevo objeto
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.userData.selectable && object.userData.isTarget && !foundObjects.has(object.userData.objectName)) {
+                hoveredObject = object;
+                highlightObject(object);
+                document.body.style.cursor = 'pointer';
+            } else {
+                hoveredObject = null;
+                document.body.style.cursor = 'default';
+            }
+        } else {
+            hoveredObject = null;
+            document.body.style.cursor = 'default';
+        }
+    }
+    
+    renderer.render(scene, camera);
 }
+
 camera.position.z = 15
 camera.position.x = 18
-camera.lookAt(-20, 0, -7); 
+camera.lookAt(-20, 0, -7);
