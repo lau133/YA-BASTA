@@ -646,22 +646,7 @@ loaderFbx.load("modelos/barbie puff.fbx", function(object){
     scene.add(object)
 })
 
-//espejo
-loaderFbx.load("modelos/barbie espejo.fbx", function(object){
-    object.scale.x=0.3
-    object.scale.y=0.3
-    object.scale.z=0.3
-    object.position.x= 23
-    object.position.y= 1
-    object.position.z= 25
-    object.rotation.y = Math.PI;
-    object.traverse(function(child){
-        if (child.isMesh){
-            child.material=material14;
-        }
-    })
-    scene.add(object)
-})
+
 
 //Cortinas
 loaderFbx.load("modelos/barbue cortinas.fbx", function(object){
@@ -909,3 +894,4 @@ function animate() {
 camera.position.z = 15
 camera.position.x = 18
 camera.lookAt(-20, 0, -7);
+
