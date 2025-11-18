@@ -386,7 +386,10 @@ loader4.load('texturas/fondo-texturizado-textil-en-relieve-rosa-pastel.jpg', (te
     material9.map = texture
 })
 
-
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load('texturas/Leaf0.jpeg');
+const normalMap  = textureLoader.load('texturas/Soil.jpeg');
+const jarroMap  = textureLoader.load('texturas/internal_ground_ao_texture.jpeg');
 
 const loader5 = new THREE.TextureLoader(manager2)
 loader5.load('texturas/Recurso 1.png', (texture)=>{
