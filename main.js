@@ -885,6 +885,43 @@ function gamepadShootPressed() {
     return gp.buttons[7]?.pressed || false; 
 }
 
+function getGamepadAxes() {
+    if (!gamepad) return { x: 0, y: 0 };
+
+    const gp = navigator.getGamepads()[gamepad.index];
+    if (!gp) return { x: 0, y: 0 };
+
+    return {
+        x: gp.axes[0] || 0,
+        y: gp.axes[1] || 0
+    };
+}
+
+
+function moveCameraWithGamepad(dt) {
+    if (!gamepad) return;
+
+    // Joystick izquierdo: axes[0] = horizontal, axes[1] = vertical
+    const x = gamepad.axes[0];   // izquierda / derecha
+    const y = gamepad.axes[1];   // adelante / atrás
+
+    // Muere si casi no lo mueven (zona muerta)
+    const deadZone = 0.2;
+    const speed = 2; // velocidad de movimiento
+
+    const moveX = Math.abs(x) > deadZone ? x * speed * dt : 0;
+    const moveZ = Math.abs(y) > deadZone ? y * speed * dt : 0;
+
+    // La cámara en VR está dentro del XR rig:
+    const rig = renderer.xr.getCamera(camera).parent;
+
+    if (rig) {
+        rig.position.x += moveX;
+        rig.position.z += moveZ;
+    }
+}
+
+
 
 window.addEventListener('click', (event) => {
     if (renderer.xr.isPresenting) return;
@@ -907,8 +944,18 @@ window.addEventListener('click', (event) => {
     }
 });
 
+let lastTime = performance.now();
+
 function animate() {
+    const now = performance.now();
+    const dt = (now - lastTime) / 1000; // delta time en segundos
+    lastTime = now;
+
     if (!texturesReady) return;
+
+    // --- Actualizar gamepad ---
+    const pads = navigator.getGamepads();
+    if (pads[0]) gamepad = pads[0];
 
     // --- Desktop ---
     if (!renderer.xr.isPresenting) {
@@ -934,12 +981,16 @@ function animate() {
 
     // --- VR + Gamepad ---
     else {
+
+        // --- Movimiento con joystick ---
+        moveCameraWithGamepad(dt);
+
         const intersects = vrRaycast();
 
         if (intersects.length > 0) {
             const object = intersects[0].object;
 
-            // Disparo con cualquier gamepad (botón 7 = gatillo)
+            // Disparo con botón 7 (gatillo)
             if (gamepadShootPressed()) {
                 if (object.userData.selectable && object.userData.isTarget) {
                     if (!foundObjects.has(object.userData.objectName)) {
@@ -955,6 +1006,7 @@ function animate() {
 
     renderer.render(scene, camera);
 }
+
 
 
 camera.position.z = 15
