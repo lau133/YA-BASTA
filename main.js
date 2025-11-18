@@ -479,26 +479,7 @@ loaderFbx.load("modelos/barbie sofa.fbx", function(object){
 })
 
 //planta
-loaderFbx.load("modelos/Plant1.fbx", function(object){
-    object.scale.x=0.034
-    object.scale.y=0.034
-    object.scale.z=0.034
-    object.position.x= 0
-    object.position.y= -6
-    object.position.z= 15
-    object.rotation.y = Math.PI/2;
-    object.traverse((child) => {
-        if (child.isMesh) {
-            child.material = new THREE.MeshPhongMaterial({
-                jarroMap: jarroMap,
-                map: texture,
-                normalMap: normalMap,
-            });
-            child.material.needsUpdate = true;
-        }
-    });
-    scene.add(object)
-})
+
 
 //mesa
 loaderFbx.load("modelos/barbie mesa.fbx", function(object){
